@@ -1,0 +1,49 @@
+.PHONY: help init dev build start update clean
+
+help:
+	@echo "Available commands:"
+	@echo "  make init     - Initialize submodules and install dependencies"
+	@echo "  make dev      - Start development server"
+	@echo "  make build    - Build frontend for production"
+	@echo "  make start    - Start production server"
+	@echo "  make update   - Update submodules to latest"
+	@echo "  make clean    - Remove venv, node_modules and build artifacts"
+
+init:
+	@echo "Initializing submodules..."
+	git submodule update --init --recursive
+	@echo "Creating Python virtual environment..."
+	python3 -m venv venv
+	@echo "Installing Python dependencies..."
+	./venv/bin/pip install -r requirements.txt
+	@echo "Installing frontend dependencies..."
+	cd frontend && pnpm install
+	@echo "Setup complete! Run 'make dev' to start development."
+
+dev:
+	@echo "Starting development server..."
+	./venv/bin/python manage.py runserver 8080
+
+build:
+	@echo "Building frontend for production..."
+	cd frontend && pnpm build
+	@echo "Build complete!"
+
+start:
+	@echo "Starting production server..."
+	./venv/bin/python manage.py runserver 8080
+
+update:
+	@echo "Updating submodules..."
+	git submodule update --remote --merge
+	@echo "Submodules updated!"
+
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf venv/
+	rm -rf frontend/node_modules/
+	rm -rf frontend/dist/
+	rm -rf __pycache__/
+	rm -rf */__pycache__/
+	rm -rf */*/__pycache__/
+	@echo "Clean complete!"

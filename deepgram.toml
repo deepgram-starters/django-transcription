@@ -1,0 +1,20 @@
+[meta]
+title = "Django Transcription Starter"
+description = "Get started using Deepgram's Speech-to-Text with this Django demo app"
+author = "Deepgram DX Team <devrel@deepgram.com> (https://developers.deepgram.com)"
+repository = "https://github.com/deepgram-starters/django-transcription"
+useCase = "STT"
+language = "Python"
+framework = "Django"
+
+[build]
+command = "make init"
+
+[config]
+DEEPGRAM_API_KEY = "YOUR_DEEPGRAM_API_KEY"
+
+[dev]
+command = "make dev"
+
+[start]
+command = "make start"
