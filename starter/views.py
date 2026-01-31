@@ -53,16 +53,18 @@ def transcribe(request):
         # Transcribe
         if url:
             # URL transcription
-            response = deepgram.listen.rest.v("1").transcribe_url(
-                {"url": url},
-                {"model": model, "smart_format": True}
+            response = deepgram.listen.v1.media.transcribe_url(
+                url=url,
+                model=model,
+                smart_format=True,
             )
         else:
             # File transcription
             file_content = file.read()
-            response = deepgram.listen.rest.v("1").transcribe_file(
-                {"buffer": file_content},
-                {"model": model, "smart_format": True}
+            response = deepgram.listen.v1.media.transcribe_file(
+                request=file_content,
+                model=model,
+                smart_format=True,
             )
 
         # Format response

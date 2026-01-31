@@ -1,7 +1,7 @@
 """
 URL configuration for Django transcription starter.
 """
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse
@@ -18,4 +18,6 @@ def index(request):
 urlpatterns = [
     path('', index, name='index'),
     path('', include('starter.urls')),
+    # Serve static files in development
+    re_path(r'^(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 ]
