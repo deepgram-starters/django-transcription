@@ -1,17 +1,20 @@
 [meta]
-  title = "Django Transcription Starter"
-  description = "Get started using Deepgram's PreRecorded Transcription with this Django demo app"
-  author = "Deepgram DX Team <devrel@deepgram.com> (https://developers.deepgram.com)"
-  useCase = "STT"
-  language = "Python"
-  framework = "Django"
-  
+title = "Django Transcription Starter"
+description = "Get started using Deepgram's Speech-to-Text with this Django demo app"
+author = "Deepgram DX Team <devrel@deepgram.com> (https://developers.deepgram.com)"
+repository = "https://github.com/deepgram-starters/django-transcription"
+useCase = "STT"
+language = "Python"
+framework = "Django"
+
 [build]
-  command = "pip install -r requirements.txt"
+command = "make init"
 
 [config]
-  sample = "sample.env"
-  output = ".env"
+DEEPGRAM_API_KEY = "YOUR_DEEPGRAM_API_KEY"
 
-[post-build]
-  message = "Run `python ./app.py runserver localhost:8080` to get up and running."
+[dev]
+command = "make dev"
+
+[start]
+command = "make start"
