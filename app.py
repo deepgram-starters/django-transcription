@@ -1,8 +1,9 @@
 import os
 import sys
 import json
+import toml
 
-from deepgram import Deepgram
+from deepgram import DeepgramClient
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 from django.http import JsonResponse, HttpResponseBadRequest
@@ -15,76 +16,96 @@ from whitenoise import WhiteNoise
 load_dotenv()
 
 settings.configure(
-    ALLOWED_HOSTS=["localhost"],
-    DEBUG=(os.environ.get("DEBUG", "") == "1"),
+    ALLOWED_HOSTS=["*"],
+    DEBUG=(os.environ.get("DEBUG", "1") == "1"),
     ROOT_URLCONF=__name__,
     SECRET_KEY=get_random_string(40),
     MIDDLEWARE=[
         "whitenoise.middleware.WhiteNoiseMiddleware",
     ],
     STATIC_URL="/",
-    STATIC_ROOT="static/",
+    STATIC_ROOT="frontend/dist/",
     STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage",
     TEMPLATES=[
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
-            "DIRS": ["static"],
+            "DIRS": ["frontend/dist"],
         },
     ],
 )
 
-deepgram = Deepgram(os.environ.get("DEEPGRAM_API_KEY"))
+# Initialize Deepgram client
+API_KEY = os.environ.get("DEEPGRAM_API_KEY")
+if not API_KEY:
+    raise ValueError("DEEPGRAM_API_KEY required")
+deepgram = DeepgramClient(api_key=API_KEY)
 
 
 async def transcribe(request):
     if request.method == "POST":
-        form = request.POST
-        files = request.FILES
-
-        url = form.get("url")
-        features = form.get("features")
-        model = form.get("model")
-        version = form.get("version")
-        tier = form.get("tier")
-
-        dgFeatures = json.loads(features)
-        dgRequest = None
-
         try:
-            if url and url.startswith("https://res.cloudinary.com/deepgram"):
-                dgRequest = {"url": url}
+            # Extract file and URL from request (form data)
+            file = request.FILES.get("file")
+            url = request.POST.get("url")
+            model = request.POST.get("model", "nova-3")
 
-            if "file" in files:
-                file = files["file"]
-                dgRequest = {"mimetype": file.content_type, "buffer": file.read()}
+            # Validate input - must have either file or URL
+            if not file and not url:
+                return json_abort("Either 'file' or 'url' must be provided")
 
-            dgFeatures["model"] = model
-
-            if version:
-                dgFeatures["version"] = version
-
-            if model == "whisper":
-                dgFeatures["tier"] = tier
-
-            if not dgRequest:
-                raise Exception(
-                    "Error: You need to choose a file to transcribe your own audio."
+            # Handle URL-based transcription
+            if url:
+                response = deepgram.listen.v1.media.transcribe_url(
+                    url=url,
+                    model=model,
+                    smart_format=True,
+                )
+            # Handle file upload
+            elif file:
+                file_data = file.read()
+                response = deepgram.listen.v1.media.transcribe_file(
+                    request=file_data,
+                    model=model,
+                    smart_format=True,
                 )
 
-            transcription = await deepgram.transcription.prerecorded(
-                dgRequest, dgFeatures
-            )
+            # Access the results from the Deepgram response
+            result = response.results.channels[0].alternatives[0]
+            metadata = response.metadata
 
-            return JsonResponse(
-                {
-                    "model": model,
-                    "version": version,
-                    "tier": tier,
-                    "dgFeatures": dgFeatures,
-                    "transcription": transcription,
-                }
-            )
+            if not result:
+                return json_abort("No transcription results returned from Deepgram")
+
+            # Build response object matching the contract
+            transcription = {
+                "transcript": result.transcript or "",
+            }
+
+            # Add optional fields if available
+            if hasattr(result, 'words') and result.words:
+                transcription["words"] = [
+                    {
+                        "text": word.word,
+                        "start": word.start,
+                        "end": word.end,
+                    }
+                    for word in result.words
+                ]
+
+            if metadata and hasattr(metadata, 'duration'):
+                transcription["duration"] = metadata.duration
+
+            # Add metadata
+            transcription["metadata"] = {
+                "model_uuid": metadata.model_uuid if hasattr(metadata, 'model_uuid') else None,
+                "request_id": metadata.request_id if hasattr(metadata, 'request_id') else None,
+                "model_name": model,
+            }
+
+            return JsonResponse(transcription)
+
         except Exception as error:
+            print(f"Transcription error: {error}")
             return json_abort(str(error))
     else:
         return HttpResponseBadRequest("Invalid HTTP method")
@@ -98,13 +119,24 @@ def index(request):
     return render(request, "index.html")
 
 
+def metadata(request):
+    """Return metadata from deepgram.toml"""
+    try:
+        with open('deepgram.toml', 'r') as f:
+            config = toml.load(f)
+        return JsonResponse(config.get('meta', {}))
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 urlpatterns = [
     path("", index),
-    path("api", transcribe, name="transcribe"),
+    path("api/metadata", metadata, name="metadata"),
+    path("stt/transcribe", transcribe, name="transcribe"),
 ]
 
 app = get_wsgi_application()
-app = WhiteNoise(app, root="static/", prefix="/")
+app = WhiteNoise(app, root="frontend/dist/", prefix="/")
 
 if __name__ == "__main__":
     from django.core.management import execute_from_command_line
