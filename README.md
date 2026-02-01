@@ -2,75 +2,122 @@
 
 [![Discord](https://dcbadge.vercel.app/api/server/xWRaCDBtW4?style=flat)](https://discord.gg/xWRaCDBtW4)
 
-
-This sample demonstrates interacting with the Deepgram API from Django to make transcriptions of prerecorded files. It uses the Deepgram Python SDK, with a javascript client built from web components (no `npm` requirements).
+This sample demonstrates interacting with the Deepgram API from Django to transcribe prerecorded audio files. It uses the Deepgram Python SDK with a frontend built from web components.
 
 ## What is Deepgram?
 
-[Deepgram’s](https://deepgram.com/) voice AI platform provides APIs for speech-to-text, text-to-speech, and full speech-to-speech voice agents. Over 200,000+ developers use Deepgram to build voice AI products and features.
+[Deepgram's](https://deepgram.com/) voice AI platform provides APIs for speech-to-text, text-to-speech, and full speech-to-speech voice agents. Over 200,000+ developers use Deepgram to build voice AI products and features.
 
 ## Sign-up to Deepgram
 
-Before you start, it's essential to generate a Deepgram API key to use in this project. [Sign-up now for Deepgram and create an API key](https://console.deepgram.com/signup?jump=keys)..
+Before you start, it's essential to generate a Deepgram API key to use in this project. [Sign-up now for Deepgram and create an API key](https://console.deepgram.com/signup?jump=keys).
 
 ## Quickstart
 
-### Manual
+<!--
+### Using Deepgram CLI (Recommended)
 
-Follow these steps to get started with this starter application.
-
-#### Clone the repository
-
-Go to GitHub and [clone the repository](https://github.com/deepgram-starters/prerecorded-django-starter).
-
-#### Install dependencies
-
-Install the project dependencies.
+The Deepgram CLI (`deepctl`) reads commands from `deepgram.toml` and handles setup automatically.
 
 ```bash
-pip install -r requirements.txt
+# Install Deepgram CLI
+npm install -g @deepgram/cli
+
+# Initialize and run
+deepctl init    # Initialize submodules, create venv, install dependencies, setup .env
+deepctl build   # Build frontend for production
+deepctl dev     # Start development server at http://localhost:8080
+```
+-->
+
+### Using Make (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/deepgram-starters/django-transcription.git
+cd django-transcription
+
+# Initialize and install all dependencies
+make init
+
+# Build the frontend
+make build
+
+# Start the development server
+make dev
 ```
 
-#### Edit the config file
+The application will be available at http://localhost:8080.
 
-Copy the code from `sample.env` and create a new file called `.env`. Paste in the code and enter your API key you generated in the [Deepgram console](https://console.deepgram.com/).
+**Other make commands:**
+- `make start` - Start production server
+- `make clean` - Remove venv, node_modules, and build artifacts
+- `make update` - Update frontend submodule to latest
+- `make status` - Show git and submodule status
+
+### Manual Setup
+
+If you prefer not to use Make:
 
 ```bash
-DEEPGRAM_API_KEY=%api_key%
+# Clone and setup
+git clone https://github.com/deepgram-starters/django-transcription.git
+cd django-transcription
+
+# Initialize submodules
+git submodule update --init --recursive
+
+# Create Python virtual environment
+python3 -m venv venv
+
+# Install backend dependencies
+./venv/bin/pip install -r requirements.txt
+
+# Install frontend dependencies
+cd frontend && pnpm install && cd ..
+
+# Setup environment
+cp sample.env .env
+# Edit .env and add your DEEPGRAM_API_KEY
+
+# Build frontend
+cd frontend && pnpm build && cd ..
+
+# Start development server
+./venv/bin/python app.py runserver 8080
 ```
 
-#### Run the application
+The application will be available at http://localhost:8080.
 
-Once running, you can [access the application in your browser](http://localhost:8080/).
+## Development
+
+This project uses:
+- **Backend**: Django (single-file app with settings.configure())
+- **Frontend**: Vite + Web Components (in `frontend/` submodule)
+- **Port**: 8080 (both dev and production)
+
+### Frontend Development
+
+The frontend is a git submodule. To update it:
 
 ```bash
-python ./app.py runserver localhost:8080
+make update  # or: git submodule update --remote --merge
 ```
 
-## Setting up a Python developer environment
+### Project Structure
 
-Install `virtualenv`.
-
-```bash
-pip install virtualenv
 ```
-
-Create a virtual environment.
-
-```bash
-python -m venv env
-```
-
-Activate the environment.
-
-```bash
-source env/bin/activate
-```
-
-Then install your dependencies with pip and they will be installed in the virtual environment rather than your user.
-
-```bash
-pip install -r requirements.txt
+django-transcription/
+├── app.py                 # Django application (single-file)
+├── deepgram.toml          # Deepgram CLI configuration
+├── Makefile               # Make commands
+├── requirements.txt       # Python dependencies
+├── sample.env             # Environment template
+├── .env                   # Your API keys (git-ignored)
+└── frontend/              # Frontend submodule
+    ├── src/               # Source files
+    ├── dist/              # Built files (served by Django)
+    └── package.json       # Frontend dependencies
 ```
 
 ## Issue Reporting
@@ -81,7 +128,7 @@ If you have found a bug or if you have a feature request, please report them at 
 
 We love to hear from you so if you have questions, comments or find a bug in the project, let us know! You can either:
 
-- [Open an issue in this repository](https://github.com/deepgram-starters/prerecorded-django-starter/issues/new)
+- [Open an issue in this repository](https://github.com/deepgram-starters/django-transcription/issues/new)
 - [Join the Deepgram Github Discussions Community](https://github.com/orgs/deepgram/discussions)
 - [Join the Deepgram Discord Community](https://discord.gg/xWRaCDBtW4)
 

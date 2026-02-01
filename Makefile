@@ -23,7 +23,7 @@ init:
 
 dev:
 	@echo "Starting development server..."
-	./venv/bin/python app.py
+	./venv/bin/daphne -b 0.0.0.0 -p 8080 config.asgi:application
 
 build:
 	@echo "Building frontend for production..."
@@ -32,7 +32,7 @@ build:
 
 start:
 	@echo "Starting production server..."
-	./venv/bin/python app.py
+	./venv/bin/daphne -b 0.0.0.0 -p 8080 config.asgi:application
 
 update:
 	@echo "Updating submodules..."

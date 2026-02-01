@@ -41,7 +41,7 @@ if not API_KEY:
 deepgram = DeepgramClient(api_key=API_KEY)
 
 
-async def transcribe(request):
+def transcribe(request):
     if request.method == "POST":
         try:
             # Extract file and URL from request (form data)

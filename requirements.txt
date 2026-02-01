@@ -1,6 +1,7 @@
+channels==4.0.0
+daphne==4.1.0
 deepgram-sdk==5.3.2
 django==5.0.0
 django-cors-headers==4.3.1
 python-dotenv==1.0.1
 toml==0.10.2
-whitenoise==6.7.0
