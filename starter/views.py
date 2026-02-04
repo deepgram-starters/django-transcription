@@ -1,6 +1,6 @@
 """Django Transcription Starter - Views"""
 import os, json
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from deepgram import DeepgramClient
@@ -25,7 +25,13 @@ def transcribe(request):
 
         # Validate input - must have either file or URL
         if not file and not url:
-            return HttpResponseBadRequest(json.dumps({"err": "Either 'file' or 'url' must be provided"}))
+            return JsonResponse({
+                "error": {
+                    "type": "ValidationError",
+                    "code": "INVALID_INPUT",
+                    "message": "Either 'file' or 'url' must be provided"
+                }
+            }, status=400)
 
         # Handle URL-based transcription
         if url:
@@ -48,7 +54,13 @@ def transcribe(request):
         metadata = response.metadata
 
         if not result:
-            return HttpResponseBadRequest(json.dumps({"err": "No transcription results returned from Deepgram"}))
+            return JsonResponse({
+                "error": {
+                    "type": "TranscriptionError",
+                    "code": "NO_RESULTS",
+                    "message": "No transcription results returned from Deepgram"
+                }
+            }, status=500)
 
         # Build response object matching the contract
         transcription = {
@@ -80,7 +92,13 @@ def transcribe(request):
 
     except Exception as error:
         print(f"Transcription error: {error}")
-        return HttpResponseBadRequest(json.dumps({"err": str(error)}))
+        return JsonResponse({
+            "error": {
+                "type": "TranscriptionError",
+                "code": "TRANSCRIPTION_FAILED",
+                "message": str(error)
+            }
+        }, status=500)
 
 @require_http_methods(["GET"])
 def metadata(request):

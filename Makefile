@@ -1,4 +1,4 @@
-.PHONY: help check-prereqs init install install-backend install-frontend start-backend start-frontend start test update clean status
+.PHONY: help check check-prereqs init install install-backend install-frontend start-backend start-frontend start test update clean status
 
 help:
 	@echo "Available commands:"
@@ -21,6 +21,8 @@ check-prereqs:
 	@command -v pip3 >/dev/null 2>&1 || { echo "❌ pip3 is required but not installed."; exit 1; }
 	@echo "✓ All prerequisites installed"
 	@echo ""
+
+check: check-prereqs
 
 init: check-prereqs
 	@echo "==> Initializing submodules..."
