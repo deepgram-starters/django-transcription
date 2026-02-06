@@ -1,141 +1,60 @@
-# Django Transcription Starter
+# Django Transcription
 
-[![Discord](https://dcbadge.vercel.app/api/server/xWRaCDBtW4?style=flat)](https://discord.gg/xWRaCDBtW4)
+Get started using Deepgram's Transcription with this Django demo app
 
-This sample demonstrates interacting with the Deepgram API from Django to transcribe prerecorded audio files. It uses the Deepgram Python SDK with a frontend built from web components.
+<!-- [**Live Demo \u2192**](#) -->
 
-## What is Deepgram?
+## Quick Start
 
-[Deepgram's](https://deepgram.com/) voice AI platform provides APIs for speech-to-text, text-to-speech, and full speech-to-speech voice agents. Over 200,000+ developers use Deepgram to build voice AI products and features.
+Click the button below to fork the repo:
 
-## Sign-up to Deepgram
+[![Fork on GitHub](https://img.shields.io/badge/Fork_on_GitHub-blue?logo=github)](https://github.com/deepgram-starters/django-transcription/fork)
 
-Before you start, it's essential to generate a Deepgram API key to use in this project. [Sign-up now for Deepgram and create an API key](https://console.deepgram.com/signup?jump=keys).
-
-## Quickstart
+## Local Development
 
 <!--
-### Using Deepgram CLI (Recommended)
-
-The Deepgram CLI (`deepctl`) reads commands from `deepgram.toml` and handles setup automatically.
+### CLI
 
 ```bash
-# Install Deepgram CLI
-npm install -g @deepgram/cli
-
-# Initialize and run
-deepctl init    # Initialize submodules, create venv, install dependencies, setup .env
-deepctl build   # Build frontend for production
-deepctl dev     # Start development server at http://localhost:8080
+dg check
+dg install
+dg start
 ```
 -->
 
-### Using Make (Recommended)
+### Makefile (Recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/deepgram-starters/django-transcription.git
-cd django-transcription
-
-# Initialize and install all dependencies
 make init
-
-# Build the frontend
-make build
-
-# Start the development server
-make dev
+cp sample.env .env  # Add your DEEPGRAM_API_KEY
+make start
 ```
 
-The application will be available at http://localhost:8080.
+Open [http://localhost:8080](http://localhost:8080) in your browser.
 
-**Other make commands:**
-- `make start` - Start production server
-- `make clean` - Remove venv, node_modules, and build artifacts
-- `make update` - Update frontend submodule to latest
-- `make status` - Show git and submodule status
-
-### Manual Setup
-
-If you prefer not to use Make:
+### Python & pnpm
 
 ```bash
-# Clone and setup
-git clone https://github.com/deepgram-starters/django-transcription.git
+git clone --recurse-submodules https://github.com/deepgram-starters/django-transcription.git
 cd django-transcription
-
-# Initialize submodules
-git submodule update --init --recursive
-
-# Create Python virtual environment
 python3 -m venv venv
-
-# Install backend dependencies
 ./venv/bin/pip install -r requirements.txt
-
-# Install frontend dependencies
-cd frontend && pnpm install && cd ..
-
-# Setup environment
-cp sample.env .env
-# Edit .env and add your DEEPGRAM_API_KEY
-
-# Build frontend
-cd frontend && pnpm build && cd ..
-
-# Start development server
-./venv/bin/python app.py runserver 8080
+cd frontend && corepack pnpm install && cd ..
+cp sample.env .env  # Add your DEEPGRAM_API_KEY
 ```
 
-The application will be available at http://localhost:8080.
-
-## Development
-
-This project uses:
-- **Backend**: Django (single-file app with settings.configure())
-- **Frontend**: Vite + Web Components (in `frontend/` submodule)
-- **Port**: 8080 (both dev and production)
-
-### Frontend Development
-
-The frontend is a git submodule. To update it:
+Start both servers in separate terminals:
 
 ```bash
-make update  # or: git submodule update --remote --merge
+# Terminal 1 - Backend (port 8081)
+./venv/bin/daphne -b 0.0.0.0 -p 8081 config.asgi:application
+
+# Terminal 2 - Frontend (port 8080)
+cd frontend && corepack pnpm run dev -- --port 8080 --no-open
 ```
 
-### Project Structure
-
-```
-django-transcription/
-├── app.py                 # Django application (single-file)
-├── deepgram.toml          # Deepgram CLI configuration
-├── Makefile               # Make commands
-├── requirements.txt       # Python dependencies
-├── sample.env             # Environment template
-├── .env                   # Your API keys (git-ignored)
-└── frontend/              # Frontend submodule
-    ├── src/               # Source files
-    ├── dist/              # Built files (served by Django)
-    └── package.json       # Frontend dependencies
-```
-
-## Issue Reporting
-
-If you have found a bug or if you have a feature request, please report them at this repository issues section. Please do not report security vulnerabilities on the public GitHub issue tracker. The [Security Policy](./SECURITY.md) details the procedure for contacting Deepgram.
-
-## Getting Help
-
-We love to hear from you so if you have questions, comments or find a bug in the project, let us know! You can either:
-
-- [Open an issue in this repository](https://github.com/deepgram-starters/django-transcription/issues/new)
-- [Join the Deepgram Github Discussions Community](https://github.com/orgs/deepgram/discussions)
-- [Join the Deepgram Discord Community](https://discord.gg/xWRaCDBtW4)
-
-## Author
-
-[Deepgram](https://deepgram.com)
+Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](./LICENSE) file for more info.
+MIT - See [LICENSE](./LICENSE)
