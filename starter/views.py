@@ -16,7 +16,7 @@ deepgram = DeepgramClient(api_key=API_KEY)
 @csrf_exempt
 @require_http_methods(["POST"])
 def transcribe(request):
-    """POST /stt/transcribe"""
+    """POST /api/transcription"""
     try:
         # Extract file and URL from request (form data)
         file = request.FILES.get("file")

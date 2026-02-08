@@ -17,7 +17,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Server configuration
 PORT = int(os.environ.get('PORT', 8081))
 HOST = os.environ.get('HOST', '0.0.0.0')
-FRONTEND_PORT = int(os.environ.get('FRONTEND_PORT', 8080))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-change-in-production')
@@ -28,11 +27,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 ALLOWED_HOSTS = ['*']
 
 # CORS configuration
-CORS_ALLOWED_ORIGINS = [
-    f"http://localhost:{FRONTEND_PORT}",
-    f"http://127.0.0.1:{FRONTEND_PORT}",
-]
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 INSTALLED_APPS = [
