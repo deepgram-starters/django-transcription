@@ -6,7 +6,7 @@ repository = "https://github.com/deepgram-starters/django-transcription"
 useCase = "transcription"
 language = "python"
 framework = "django"
-sdk = "6.0.0-rc.1"
+sdk = "deepgram-sdk"
 tags = ["transcription", "stt", "speech-to-text", "asr", "pre-recorded", "python", "django"]
 
 # Check prerequisites
