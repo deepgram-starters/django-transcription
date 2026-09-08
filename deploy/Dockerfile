@@ -8,11 +8,12 @@ RUN xcaddy build --with github.com/mholt/caddy-ratelimit
 # Stage 2: Build frontend
 FROM node:24-slim AS frontend-builder
 RUN corepack enable
+RUN corepack prepare pnpm@9.15.9 --activate
 WORKDIR /build
 COPY frontend/package.json frontend/pnpm-lock.yaml ./frontend/
 RUN cd frontend && pnpm install --frozen-lockfile
 COPY frontend/ ./frontend/
-RUN cd frontend && pnpm build
+RUN cd frontend && pnpm --ignore-workspace run build
 # Inject Caddy template directive for subpath base path
 RUN sed -i 's|<head>|<head>\n  <base href="{{ .Req.Header.Get "X-Base-Path" }}">|' ./frontend/dist/index.html
 
@@ -32,7 +33,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY config/ ./config/
 COPY starter/ ./starter/
 COPY manage.py deepgram.toml sample.env ./
-COPY static/ ./static/
 
 # Copy built frontend
 COPY --from=frontend-builder /build/frontend/dist/ ./frontend/dist/
@@ -44,6 +44,7 @@ RUN chmod +x ./start.sh
 
 ENV PORT=8081
 ENV HOST=0.0.0.0
+ENV DJANGO_DEBUG=0
 EXPOSE 8080
 
 ENV BACKEND_CMD="daphne -b 0.0.0.0 -p 8081 config.asgi:application"

@@ -2,10 +2,12 @@
 import functools
 import os
 import json
+import logging
 import secrets
 import time
 
 import jwt
+from deepgram.core import ApiError
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -18,6 +20,7 @@ API_KEY = os.environ.get("DEEPGRAM_API_KEY")
 if not API_KEY:
     raise ValueError("DEEPGRAM_API_KEY required")
 deepgram = DeepgramClient(api_key=API_KEY)
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # SESSION AUTH - JWT tokens for production security
@@ -91,6 +94,22 @@ def get_session(request):
         algorithm="HS256",
     )
     return JsonResponse({"token": token})
+
+
+def deepgram_error_response(error):
+    """Log upstream details without exposing them to the browser."""
+    logger.error(
+        "Deepgram transcription request failed (HTTP %s): %s",
+        error.status_code,
+        error.body,
+    )
+    return JsonResponse({
+        "error": {
+            "type": "TranscriptionError",
+            "code": "TRANSCRIPTION_FAILED",
+            "message": f"Deepgram request failed (HTTP {error.status_code})",
+        }
+    }, status=500)
 
 
 # ============================================================================
@@ -175,8 +194,10 @@ def transcribe(request):
 
         return JsonResponse(transcription)
 
+    except ApiError as error:
+        return deepgram_error_response(error)
     except Exception as error:
-        print(f"Transcription error: {error}")
+        logger.exception("Transcription error")
         return JsonResponse({
             "error": {
                 "type": "TranscriptionError",
