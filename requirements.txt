@@ -4,5 +4,5 @@ deepgram-sdk>=7.7.0,<8.0.0
 django==5.2.17
 django-cors-headers==4.3.1
 PyJWT==2.13.0
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 toml==0.10.2
